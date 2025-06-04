@@ -14,7 +14,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import RoomDetail from './pages/RoomDetail';
 import Settings from './pages/Settings';
-import ProtectedRoutes from './utils/protectedRoutes';
+import ProtectedRoutes from './utils/ProtectedRoutes';
 import { AnimatePresence } from 'framer-motion';
 
 const queryClient = new QueryClient();
