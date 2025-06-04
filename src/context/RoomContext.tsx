@@ -51,36 +51,36 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
   const initializeDemoRooms = () => {
     // Initialize with demo data if no saved rooms
     const demoRooms: Room[] = [
-      {
-        id: 'room-1',
-        name: 'Living Room',
-        icon: 'house',
-        order: 0,
-        switches: [
-          {
-            id: 'switch-1',
-            name: 'Main Light',
-            isOn: false,
-            icon: 'lightbulb',
-          },
-          { id: 'switch-2', name: 'TV', isOn: true, icon: 'monitor' },
-        ],
-      },
-      {
-        id: 'room-2',
-        name: 'Bedroom',
-        icon: 'bell',
-        order: 1,
-        switches: [
-          {
-            id: 'switch-3',
-            name: 'Ceiling Light',
-            isOn: false,
-            icon: 'lightbulb',
-          },
-          { id: 'switch-4', name: 'Desk Lamp', isOn: false, icon: 'lamp' },
-        ],
-      },
+      //   {
+      //     id: 'room-1',
+      //     name: 'Living Room',
+      //     icon: 'house',
+      //     order: 0,
+      //     switches: [
+      //       {
+      //         id: 'switch-1',
+      //         name: 'Main Light',
+      //         isOn: false,
+      //         icon: 'lightbulb',
+      //       },
+      //       { id: 'switch-2', name: 'TV', isOn: true, icon: 'monitor' },
+      //     ],
+      //   },
+      //   {
+      //     id: 'room-2',
+      //     name: 'Bedroom',
+      //     icon: 'bell',
+      //     order: 1,
+      //     switches: [
+      //       {
+      //         id: 'switch-3',
+      //         name: 'Ceiling Light',
+      //         isOn: false,
+      //         icon: 'lightbulb',
+      //       },
+      //       { id: 'switch-4', name: 'Desk Lamp', isOn: false, icon: 'lamp' },
+      //     ],
+      //   },
     ];
     setRooms(demoRooms);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(demoRooms));
@@ -93,6 +93,11 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
     const parsedRooms = JSON.parse(savedRooms);
     // console.log("Loaded rooms from localStorage:", parsedRooms);
     setRooms(parsedRooms);
+
+    if (!parsedRooms || parsedRooms.length === 0) {
+      // console.log("No saved rooms found, initializing demo rooms");
+      initializeDemoRooms();
+    }
 
     // TODO: Update rooms from api
 

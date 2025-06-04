@@ -111,7 +111,7 @@ export default function Dashboard() {
               </p>
             </div>
             <div className='flex flex-wrap gap-2'>
-              {rooms.length > 0 && (
+              {rooms && rooms.length > 0 && (
                 <Button
                   variant={isDraggingEnabled ? 'default' : 'outline'}
                   onClick={toggleDraggingMode}
@@ -144,7 +144,7 @@ export default function Dashboard() {
             className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative'
           >
             <AnimatePresence>
-              {rooms.length > 0 ? (
+              {rooms && rooms.length > 0 ? (
                 rooms.map((room, index) => (
                   <motion.div
                     key={room.id}
