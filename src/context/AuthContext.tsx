@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         password,
       });
 
-      //   console.log('Login response:', response);
+      // console.log('Login response:', response);
 
       const data = response.data.data;
 
@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         passwordConfirm,
       });
 
-      //   console.log('Login response:', response);
+      // console.log('Login response:', response);
 
       const data = response.data.data;
 

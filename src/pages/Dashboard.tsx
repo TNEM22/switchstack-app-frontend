@@ -47,13 +47,14 @@ export default function Dashboard() {
   const [isDraggingEnabled, setIsDraggingEnabled] = useState(false);
   const isMobile = useIsMobile();
 
-  const handleAddRoom = () => {
-    if (newRoomName.trim()) {
-      addRoom(newRoomName.trim(), selectedIcon);
-      setNewRoomName('');
-      setNewDeviceId('');
-      setSelectedIcon('house');
-      setIsAddingRoom(false);
+  const handleAddRoom = async () => {
+    if (newRoomName.trim() && newDeviceId.trim()) {
+      addRoom(newRoomName.trim(), newDeviceId.trim(), selectedIcon, () => {
+        setNewRoomName('');
+        setNewDeviceId('');
+        setSelectedIcon('house');
+        setIsAddingRoom(false);
+      });
     }
   };
 
@@ -278,15 +279,17 @@ export default function Dashboard() {
                 placeholder='Living Room, Kitchen, etc.'
                 value={newRoomName}
                 onChange={(e) => setNewRoomName(e.target.value)}
+                required
               />
             </div>
             <div className='grid gap-2'>
               <Label htmlFor='device-name'>Device Id</Label>
               <Input
                 id='device-name'
-                placeholder='Device Id'
+                placeholder='For Demo use demo'
                 value={newDeviceId}
                 onChange={(e) => setNewDeviceId(e.target.value)}
+                required
               />
             </div>
             <div className='grid gap-2'>

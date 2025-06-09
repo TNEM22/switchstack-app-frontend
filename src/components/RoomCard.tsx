@@ -34,6 +34,8 @@ export function RoomCard({
   const activeSwitches = room.switches.filter((sw) => sw.isOn).length;
   const totalSwitches = room.switches.length;
 
+  console.log(room);
+
   const handleSwitchToggle = (e: React.MouseEvent, switchItem: SwitchType) => {
     e.preventDefault();
     e.stopPropagation();
@@ -130,8 +132,12 @@ export function RoomCard({
             </div>
           </CardContent>
           <CardFooter>
-            <Badge className='bg-primary/15 hover:bg-primary/20 text-foreground'>
+            {/* <Badge className='bg-primary/15 hover:bg-primary/20 text-foreground'> */}
+            <Badge className='bg-primary/20 text-foreground'>
               {activeSwitches} of {totalSwitches} active
+            </Badge>
+            <Badge className='ml-2 bg-green-500/55 text-foreground'>
+              Demo Room
             </Badge>
           </CardFooter>
         </Card>

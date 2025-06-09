@@ -1,5 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 import { toast } from '@/components/ui/sonner';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+import { SERVER_URL } from '@/constants';
 
 export interface Switch {
   id: string;
@@ -14,12 +17,18 @@ export interface Room {
   icon: string;
   switches: Switch[];
   order: number;
+  type: 'demo' | null; // 'demo' for demo rooms, null for real rooms
 }
 
 interface RoomContextType {
   rooms: Room[];
   loading: boolean;
-  addRoom: (name: string, icon: string) => void;
+  addRoom: (
+    name: string,
+    device_id: string,
+    icon: string,
+    cb: () => void
+  ) => void;
   updateRoom: (id: string, updates: Partial<Room>) => void;
   deleteRoom: (id: string) => void;
   addSwitch: (roomId: string, name: string, icon: string) => void;
@@ -44,7 +53,7 @@ const RoomContext = createContext<RoomContextType | undefined>(undefined);
 const STORAGE_KEY = 'switchstack-rooms';
 
 export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
-  //   console.log("RoomProvider rendered");
+  // console.log("RoomProvider rendered");
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -107,22 +116,37 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
   // Save rooms to localStorage whenever they change
   useEffect(() => {
     if (!loading) {
-      //   console.log("Saving rooms to localStorage:", rooms);
+      // console.log("Saving rooms to localStorage:", rooms);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(rooms));
     }
   }, [rooms, loading]);
 
-  const addRoom = (name: string, icon: string) => {
+  const addRoom = async (
+    name: string,
+    device_id: string,
+    icon: string,
+    cb: () => void
+  ) => {
+    let id = device_id;
+    if (id === 'demo') {
+      id = `room-${Date.now()}`;
+    } else {
+      const url = `${SERVER_URL}/api/v1/esps/register`;
+      const response = await axios.post(url, { device_id });
+      const dd = response.data;
+      console.log(dd);
+    }
     const newRoom: Room = {
-      id: `room-${Date.now()}`,
+      id,
       name,
       icon,
       switches: [],
       order: rooms.length,
+      type: device_id === 'demo' ? 'demo' : null,
     };
-
     setRooms([...rooms, newRoom]);
     toast.success(`Room "${name}" created successfully`);
+    cb();
   };
 
   const updateRoom = (id: string, updates: Partial<Room>) => {
@@ -266,7 +290,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
     reorderSwitches,
   };
 
-  //   console.log("RoomProvider providing context:", contextValue);
+  // console.log("RoomProvider providing context:", contextValue);
 
   return (
     <RoomContext.Provider value={contextValue}>{children}</RoomContext.Provider>
