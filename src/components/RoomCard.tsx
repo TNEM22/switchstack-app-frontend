@@ -29,17 +29,19 @@ export function RoomCard({
   isDraggingEnabled = false,
   isLastItem = false,
 }: RoomCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
+  // const [isHovered, setIsHovered] = useState(false);
   const { toggleSwitch, reorderRooms } = useRooms();
-  const activeSwitches = room.switches.filter((sw) => sw.isOn).length;
+  // console.log('RoomCard rendered for room:', room.name);
+  // console.log('Room Switches:', room.switches);
+  const activeSwitches = room.switches.filter((sw) => sw.state).length;
   const totalSwitches = room.switches.length;
 
-  console.log(room);
+  // console.log(room);
 
   const handleSwitchToggle = (e: React.MouseEvent, switchItem: SwitchType) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleSwitch(room.id, switchItem.id);
+    toggleSwitch(room.esp_id, switchItem._id);
   };
 
   const moveUp = (e: React.MouseEvent) => {
@@ -59,12 +61,12 @@ export function RoomCard({
   };
 
   return (
-    <Link to={`/rooms/${room.id}`} className='block'>
+    <Link to={`/rooms/${room.esp_id}`} className='block'>
       <motion.div
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        onHoverStart={() => setIsHovered(true)}
-        onHoverEnd={() => setIsHovered(false)}
+        // onHoverStart={() => setIsHovered(true)}
+        // onHoverEnd={() => setIsHovered(false)}
         className='relative'
       >
         {isDesktop && isDraggingEnabled && (
@@ -93,11 +95,12 @@ export function RoomCard({
           <CardHeader className='pb-2'>
             <CardTitle className='flex items-center gap-2 text-lg'>
               <motion.div
-                animate={
-                  isHovered
-                    ? { rotate: 10, scale: 1.1 }
-                    : { rotate: 0, scale: 1 }
-                }
+                // animate={
+                //   isHovered
+                //     ? { rotate: 10, scale: 1.1 }
+                //     : { rotate: 0, scale: 1 }
+                // }
+                whileHover={{ rotate: 10, scale: 1.1 }}
                 transition={{ duration: 0.3 }}
               >
                 <DynamicIcon name={room.icon} className='h-5 w-5' />
@@ -110,22 +113,22 @@ export function RoomCard({
               {/* {room.switches.slice(0, 4).map((sw) => ( */}
               {room.switches.map((sw) => (
                 <motion.div
-                  key={sw.id}
+                  key={sw._id}
                   className={`flex flex-col items-center p-2 rounded-lg cursor-pointer ${
-                    sw.isOn ? 'bg-primary/10' : 'bg-secondary'
+                    sw.state ? 'bg-primary/10' : 'bg-secondary'
                   }`}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={(e) => handleSwitchToggle(e, sw)}
                 >
                   <DynamicIcon
-                    name={sw.icon}
+                    name={sw.icon ?? 'toggle-left'}
                     className={`h-6 w-6 mb-1 ${
-                      sw.isOn ? 'text-primary' : 'text-muted-foreground'
+                      sw.state ? 'text-primary' : 'text-muted-foreground'
                     }`}
                   />
                   <span className='text-xs truncate w-full text-center'>
-                    {sw.name}
+                    {sw.name ?? 'Switch'}
                   </span>
                 </motion.div>
               ))}
@@ -136,9 +139,11 @@ export function RoomCard({
             <Badge className='bg-primary/20 text-foreground'>
               {activeSwitches} of {totalSwitches} active
             </Badge>
-            <Badge className='ml-2 bg-green-500/55 text-foreground'>
-              Demo Room
-            </Badge>
+            {room.type === 'demo' && (
+              <Badge className='ml-2 bg-green-500/55 text-foreground'>
+                Demo Room
+              </Badge>
+            )}
           </CardFooter>
         </Card>
       </motion.div>

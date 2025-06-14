@@ -148,7 +148,7 @@ export default function Dashboard() {
               {rooms && rooms.length > 0 ? (
                 rooms.map((room, index) => (
                   <motion.div
-                    key={room.id}
+                    key={room.esp_id}
                     variants={item}
                     layout
                     transition={{

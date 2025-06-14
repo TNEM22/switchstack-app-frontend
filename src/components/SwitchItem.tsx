@@ -35,22 +35,24 @@ export function SwitchItem({
   onEdit,
   isPadded = false,
 }: SwitchItemProps) {
-  const { toggleSwitch, deleteSwitch, updateSwitch } = useRooms();
+  const { toggleSwitch, updateSwitch } = useRooms();
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(switchItem.name);
-  const [selectedIcon, setSelectedIcon] = useState(switchItem.icon);
+  const [name, setName] = useState(switchItem.name ?? 'Switch');
+  const [selectedIcon, setSelectedIcon] = useState(
+    switchItem.icon ?? 'toggle-left'
+  );
 
   const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleSwitch(roomId, switchItem.id);
+    toggleSwitch(roomId, switchItem._id);
   };
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    deleteSwitch(roomId, switchItem.id);
-  };
+  //   const handleDelete = (e: React.MouseEvent) => {
+  //     e.preventDefault();
+  //     e.stopPropagation();
+  //     deleteSwitch(roomId, switchItem._id);
+  //   };
 
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -59,7 +61,7 @@ export function SwitchItem({
   };
 
   const handleUpdate = () => {
-    updateSwitch(roomId, switchItem.id, {
+    updateSwitch(roomId, switchItem._id, {
       name,
       icon: selectedIcon,
     });
@@ -84,33 +86,33 @@ export function SwitchItem({
           <div className='flex items-center space-x-3'>
             <div
               className={`p-2 rounded-md ${
-                switchItem.isOn ? 'bg-primary/20' : 'bg-secondary'
+                switchItem.state ? 'bg-primary/20' : 'bg-secondary'
               }`}
             >
               <DynamicIcon
-                name={switchItem.icon}
+                name={switchItem.icon ?? 'toggle-left'}
                 className={`h-5 w-5 ${
-                  switchItem.isOn ? 'text-primary' : 'text-muted-foreground'
+                  switchItem.state ? 'text-primary' : 'text-muted-foreground'
                 }`}
               />
             </div>
             <div className='text-left'>
-              <p className='font-medium'>{switchItem.name}</p>
+              <p className='font-medium'>{switchItem.name ?? 'Switch'}</p>
               <p className='text-xs text-muted-foreground'>
-                {switchItem.isOn ? 'ON' : 'OFF'}
+                {switchItem.state ? 'ON' : 'OFF'}
               </p>
             </div>
           </div>
           <div className='flex items-center space-x-2'>
             <Button
               size='sm'
-              variant={switchItem.isOn ? 'default' : 'outline'}
+              variant={switchItem.state ? 'default' : 'outline'}
               onClick={handleToggle}
               className={`transition-all duration-300 ${
-                switchItem.isOn ? 'bg-primary hover:bg-primary/90' : ''
+                switchItem.state ? 'bg-primary hover:bg-primary/90' : ''
               }`}
             >
-              {switchItem.isOn ? 'ON' : 'OFF'}
+              {switchItem.state ? 'ON' : 'OFF'}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -123,13 +125,13 @@ export function SwitchItem({
                   <Pencil className='h-4 w-4 mr-2' />
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuItem
+                {/* <DropdownMenuItem
                   onClick={handleDelete}
                   className='text-destructive'
                 >
                   <Trash2 className='h-4 w-4 mr-2' />
                   Delete
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

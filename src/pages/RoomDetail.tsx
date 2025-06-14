@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageTransition } from '@/components/PageTransition';
@@ -35,35 +35,34 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from '@/components/ui/sonner';
 
 export default function RoomDetail() {
-  console.log('Rendering RoomDetail component');
+  //   console.log('Rendering RoomDetail component');
 
   const { roomId } = useParams<{ roomId: string }>();
-  console.log('Room ID from params:', roomId);
+  //   console.log('Room ID from params:', roomId);
 
   // Debug if RoomContext is available
   const roomsContext = useRooms();
-  console.log('RoomContext available:', roomsContext ? 'Yes' : 'No');
+  //   console.log('RoomContext available:', roomsContext ? 'Yes' : 'No');
 
-  const { rooms, addSwitch, deleteRoom, updateRoom, reorderSwitches } =
-    roomsContext;
+  const { rooms, deleteRoom, updateRoom, reorderSwitches } = roomsContext;
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  console.log('Rooms from context:', rooms);
+  //   console.log('Rooms from context:', rooms);
 
-  const room = rooms.find((r) => r.id === roomId);
-  console.log('Room found:', room);
+  const room = rooms.find((r) => r.esp_id === roomId);
+  //   console.log('Room found:', room);
 
-  const [isAddingSwitch, setIsAddingSwitch] = useState(false);
-  const [newSwitchName, setNewSwitchName] = useState('');
-  const [selectedIcon, setSelectedIcon] = useState('toggle-right');
+  //   const [isAddingSwitch, setIsAddingSwitch] = useState(false);
+  //   const [newSwitchName, setNewSwitchName] = useState('');
+  //   const [selectedIcon, setSelectedIcon] = useState('toggle-right');
   const [isEditingRoom, setIsEditingRoom] = useState(false);
   const [roomName, setRoomName] = useState(room?.name || '');
   const [roomIcon, setRoomIcon] = useState(room?.icon || 'house');
   const [isDraggingEnabled, setIsDraggingEnabled] = useState(false);
-  const [draggedSwitchIndex, setDraggedSwitchIndex] = useState<number | null>(
-    null
-  );
+  //   const [draggedSwitchIndex, setDraggedSwitchIndex] = useState<number | null>(
+  //     null
+  //   );
 
   if (!room) {
     return (
@@ -77,14 +76,14 @@ export default function RoomDetail() {
     );
   }
 
-  const handleAddSwitch = () => {
-    if (newSwitchName.trim()) {
-      addSwitch(roomId!, newSwitchName.trim(), selectedIcon);
-      setNewSwitchName('');
-      setSelectedIcon('toggle-right');
-      setIsAddingSwitch(false);
-    }
-  };
+  //   const handleAddSwitch = () => {
+  //     if (newSwitchName.trim()) {
+  //       addSwitch(roomId!, newSwitchName.trim(), selectedIcon);
+  //       setNewSwitchName('');
+  //       setSelectedIcon('toggle-right');
+  //       setIsAddingSwitch(false);
+  //     }
+  //   };
 
   const handleUpdateRoom = () => {
     if (roomName.trim()) {
@@ -248,13 +247,13 @@ export default function RoomDetail() {
                   </Button>
                 )}
 
-                <Button
+                {/* <Button
                   onClick={() => setIsAddingSwitch(true)}
                   size={isMobile ? 'sm' : 'default'}
                 >
                   <Plus className='mr-2 h-4 w-4' />
                   {isMobile ? 'Add' : 'Add Switch'}
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>
@@ -269,7 +268,7 @@ export default function RoomDetail() {
               {room.switches.length > 0 ? (
                 room.switches.map((switchItem, index) => (
                   <motion.div
-                    key={switchItem.id}
+                    key={switchItem._id}
                     variants={item}
                     layout
                     transition={{
@@ -303,7 +302,7 @@ export default function RoomDetail() {
                       )}
                       <div className='flex-1'>
                         <SwitchItem
-                          roomId={room.id}
+                          roomId={room.esp_id}
                           switchItem={switchItem}
                           onEdit={() => {}}
                           isPadded={isDraggingEnabled}
@@ -323,13 +322,13 @@ export default function RoomDetail() {
                   <h3 className='text-xl font-semibold mb-2'>
                     No switches yet
                   </h3>
-                  <p className='text-muted-foreground mb-6'>
+                  {/* <p className='text-muted-foreground mb-6'>
                     Add switches to control your devices in this room
-                  </p>
-                  <Button onClick={() => setIsAddingSwitch(true)}>
+                  </p> */}
+                  {/* <Button onClick={() => setIsAddingSwitch(true)}>
                     <Plus className='mr-2 h-4 w-4' />
                     Add Your First Switch
-                  </Button>
+                  </Button> */}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -349,8 +348,8 @@ export default function RoomDetail() {
           )}
         </div>
       </div>
-
-      <Dialog open={isAddingSwitch} onOpenChange={setIsAddingSwitch}>
+      {/* Switch adding form/dialog */}
+      {/* <Dialog open={isAddingSwitch} onOpenChange={setIsAddingSwitch}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Switch</DialogTitle>
@@ -383,7 +382,7 @@ export default function RoomDetail() {
             <Button onClick={handleAddSwitch}>Add Switch</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </PageTransition>
   );
 }

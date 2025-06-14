@@ -7,7 +7,6 @@ import axios from 'axios';
 interface User {
   name: string;
   email: string;
-  token?: string;
 }
 
 interface AuthContextType {
@@ -61,10 +60,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       // Make API call to the login endpoint
       const url = `${SERVER_URL}/api/v1/users/login`;
-      const response = await axios.post(url, {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        url,
+        {
+          email,
+          password,
+        },
+        { withCredentials: true }
+      );
 
       // console.log('Login response:', response);
 
@@ -78,7 +81,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const loggedInUser = {
         name: data.user.name,
         email: data.user.email,
-        token: data.token, // Store JWT token if provided
       };
 
       // Set user in state and localStorage
@@ -108,18 +110,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       // Make API call to the signup endpoint
       const url = `${SERVER_URL}/api/v1/users/signup`;
-      const response = await axios.post(url, {
-        name,
-        email,
-        password,
-        passwordConfirm,
-      });
+      const response = await axios.post(
+        url,
+        {
+          name,
+          email,
+          password,
+          passwordConfirm,
+        },
+        { withCredentials: true }
+      );
 
-      // console.log('Login response:', response);
+      //   console.log('Login response:', response);
 
       const data = response.data.data;
 
-      if (response.status !== 200) {
+      if (response.status !== 201) {
         throw new Error(data.message || 'Login failed');
       }
 
@@ -127,7 +133,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const loggedInUser = {
         name: data.user.name,
         email: data.user.email,
-        token: data.token, // Store JWT token if provided
       };
 
       // Set user in state and localStorage
@@ -137,7 +142,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       toast.success('Registration successful!');
       navigate('/');
     } catch (error) {
-      console.log('Registration error:', error.response.data);
+      //   console.log('Registration error:', error.response.data);
       if (error.response.data?.message.toLowerCase().includes('duplicate')) {
         error.message = 'Email already exists. Please use a different email.';
       }
