@@ -7,7 +7,6 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { RoomProvider } from '@/context/RoomContext';
 import { NetworkProvider } from '@/context/NetworkContext';
-import Index from './pages/Index';
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -34,7 +33,6 @@ const App = () => (
               <TooltipProvider>
                 <AnimatePresence mode='wait'>
                   <Routes>
-                    {/* <Route path='/' element={<Index />} /> */}
                     <Route path='/login' element={<Login />} />
                     <Route path='/register' element={<Register />} />
                     <Route path='/' element={<ProtectedRoutes />}>

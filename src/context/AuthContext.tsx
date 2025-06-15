@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { toast } from '@/components/ui/sonner';
 import { useNavigate } from 'react-router-dom';
-import { SERVER_URL, USER_STORAGE_KEY, ROOMS_STORAGE_KEY } from '@/constants';
 import axios from 'axios';
+
+import { SERVER_URL, USER_STORAGE_KEY, ROOMS_STORAGE_KEY } from '@/constants';
 
 interface User {
   name: string;
@@ -45,6 +46,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
+    const loadingToastId = toast.loading('Logging in...');
     // Demo login for testing purposes
     if (email === 'demo@example.com' && password === 'password') {
       const mockUser = {
@@ -53,6 +55,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       };
       setUser(mockUser);
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(mockUser));
+
+      setIsLoading(false);
+      toast.dismiss(loadingToastId);
       toast.success('Demo login successful!');
       navigate('/');
       return;
@@ -87,6 +92,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(loggedInUser);
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(loggedInUser));
 
+      toast.dismiss(loadingToastId);
       toast.success('Login successful!');
       navigate('/');
     } catch (error) {
@@ -94,6 +100,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         error instanceof Error
           ? error.message
           : 'Login failed. Please try again.';
+      toast.dismiss(loadingToastId);
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -107,6 +114,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     passwordConfirm: string
   ) => {
     setIsLoading(true);
+    const loadingToastId = toast.loading('Registering...');
     try {
       // Make API call to the signup endpoint
       const url = `${SERVER_URL}/api/v1/users/signup`;
@@ -139,6 +147,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(loggedInUser);
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(loggedInUser));
 
+      toast.dismiss(loadingToastId);
       toast.success('Registration successful!');
       navigate('/');
     } catch (error) {
@@ -150,18 +159,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         error instanceof Error
           ? error.message
           : 'Registration failed. Please try again.';
+
+      toast.dismiss(loadingToastId);
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem(USER_STORAGE_KEY);
-    localStorage.removeItem(ROOMS_STORAGE_KEY);
-    toast.info('You have been logged out');
-    navigate('/login');
+  const logout = async () => {
+    const loadingToastId = toast.loading('Logging out...');
+    try {
+      await axios.get(`${SERVER_URL}/api/v1/users/logout`, {
+        withCredentials: true,
+      });
+      setUser(null);
+      localStorage.removeItem(USER_STORAGE_KEY);
+      localStorage.removeItem(ROOMS_STORAGE_KEY);
+      // document.cookie = null; // Clear cookies
+
+      toast.dismiss(loadingToastId);
+      toast.info('You have been logged out');
+      navigate('/login');
+    } catch (error) {
+      toast.dismiss(loadingToastId);
+      toast.error('Logout failed. Please try again.');
+    }
   };
 
   return (

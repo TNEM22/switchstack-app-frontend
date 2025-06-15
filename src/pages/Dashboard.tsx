@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageTransition } from '@/components/PageTransition';
 import { NavBar } from '@/components/NavBar';
@@ -36,7 +36,6 @@ import {
   ContextMenuTrigger,
   ContextMenuSeparator,
 } from '@/components/ui/context-menu';
-import { set } from 'react-hook-form';
 
 export default function Dashboard() {
   const { rooms, addRoom, reorderRooms } = useRooms();

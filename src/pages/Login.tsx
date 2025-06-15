@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
-import { useTheme } from '@/context/ThemeContext';
 import { useNetwork } from '@/context/NetworkContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

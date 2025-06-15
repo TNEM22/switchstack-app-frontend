@@ -2,6 +2,8 @@ import axios from 'axios';
 import { toast } from '@/components/ui/sonner';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+import { useAuth } from '@/context/AuthContext';
+
 import { SERVER_URL, USER_STORAGE_KEY, ROOMS_STORAGE_KEY } from '@/constants';
 
 export interface Switch {
@@ -58,6 +60,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
   // console.log("RoomProvider rendered");
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isAuthenticated } = useAuth();
 
   /*const initializeDemoRooms = () => {
       // Initialize with demo data if no saved rooms
@@ -99,17 +102,20 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Initialize Rooms from localStorage and update from API
   useEffect(() => {
-    if (!localStorage.getItem(USER_STORAGE_KEY)) return; // Check if user is logged in
+    console.log('RoomProvider useEffect running');
+    if (!isAuthenticated) return; // Check if user is logged in
+
+    // Set loading state to true at the beginning
+    setLoading(true);
+    // Show loading toast that will stay until dismissed
+    const loadingToastId = toast.loading('Loading your rooms...');
+
     // Initially Load rooms from localStorage
     const savedRooms = localStorage.getItem(ROOMS_STORAGE_KEY);
-    const parsedRooms = JSON.parse(savedRooms);
+    const parsedRooms = JSON.parse(savedRooms) ?? []; // Default to empty array if null
     // console.log('SavedRooms:', savedRooms);
     // console.log('ParsedRooms:', parsedRooms);
-    if (parsedRooms === null) {
-      setRooms([]);
-    } else {
-      setRooms(parsedRooms);
-    }
+    setRooms(parsedRooms);
 
     // if (!parsedRooms || parsedRooms.length === 0) {
     //   // console.log("No saved rooms found, initializing demo rooms");
@@ -123,7 +129,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
       .then((response) => {
         // console.log(response);
         const data = response.data.data.esps;
-        // console.log('Data:', data);
+        console.log('Data:', data);
         // Compare with localStorage
         if (!data || data.length === 0) {
           setRooms([]);
@@ -191,22 +197,32 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
             setRooms(updatedRooms);
           }
         }
+
+        // Set loading to false after rooms are fetched and updated
+        setLoading(false);
+        // Dismiss the loading toast and show success message
+        toast.dismiss(loadingToastId);
+        toast.success('Rooms loaded successfully');
       })
       .catch((error) => {
         console.error(error);
-      });
 
-    setLoading(false);
-  }, []);
+        // Set loading to false on error as well
+        setLoading(false);
+        // Dismiss the loading toast and show error message
+        toast.dismiss(loadingToastId);
+        toast.error('Failed to load rooms');
+      });
+  }, [isAuthenticated]);
 
   // Save rooms to localStorage whenever they change
   useEffect(() => {
-    if (!localStorage.getItem(USER_STORAGE_KEY)) return; // Check if user is logged in
+    if (!isAuthenticated) return; // Check if user is logged in
     if (!loading) {
       // console.log("Saving rooms to localStorage:", rooms);
       localStorage.setItem(ROOMS_STORAGE_KEY, JSON.stringify(rooms));
     }
-  }, [rooms, loading]);
+  }, [rooms, loading, isAuthenticated]);
 
   const addRoom = async (
     name: string,
@@ -214,6 +230,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
     icon: string,
     cb: () => void
   ) => {
+    const loadingToastId = toast.loading('Adding room...');
     let esp_id = device_id;
     let switches: Switch[] = [];
     if (esp_id === 'demo') {
@@ -254,12 +271,18 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
         newRoom.type = 'demo';
       }
       setRooms([...rooms, newRoom]);
+
+      toast.dismiss(loadingToastId);
       toast.success(`Room "${name}" created successfully`);
       cb();
+    } else {
+      toast.dismiss(loadingToastId);
+      toast.error('Failed to create room');
     }
   };
 
   const updateRoom = async (roomId: string, updates: Partial<Room>) => {
+    const loadingToastId = toast.loading('Updating room...');
     try {
       await axios.patch(
         `${SERVER_URL}/api/v1/esps/${roomId}`,
@@ -276,9 +299,12 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
           room.esp_id === roomId ? { ...room, ...updates } : room
         )
       );
+
+      toast.dismiss(loadingToastId);
       toast.success('Room updated successfully');
     } catch (error) {
       //   console.error('Error updating room:', error);
+      toast.dismiss(loadingToastId);
       toast.error('Failed to update room');
     }
   };
@@ -319,6 +345,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
     updates: Partial<Switch>
   ) => {
     // console.log(updates);
+    const loadingToastId = toast.loading('Updating switch...');
     try {
       await axios.patch(
         `${SERVER_URL}/api/v1/esps/${roomId}/switch/${switchId}`,
@@ -341,9 +368,13 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
           return room;
         })
       );
+
+      toast.dismiss(loadingToastId);
       toast.success('Switch updated successfully');
     } catch (error) {
       //   console.log('Error updating switch:', error);
+
+      toast.dismiss(loadingToastId);
       toast.error('Failed to update switch');
     }
   };

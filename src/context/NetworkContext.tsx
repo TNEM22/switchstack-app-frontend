@@ -68,8 +68,8 @@ export const NetworkProvider = ({
     >
       {children}
       {!isOnline && (
-        <div className="fixed bottom-0 left-0 right-0 bg-destructive text-destructive-foreground p-2 z-50 flex items-center justify-center space-x-2">
-          <span className="inline-block h-2 w-2 rounded-full bg-current animate-pulse" />
+        <div className='fixed bottom-0 left-0 right-0 bg-destructive text-destructive-foreground p-2 z-50 flex items-center justify-center space-x-2'>
+          <span className='inline-block h-2 w-2 rounded-full bg-current animate-pulse' />
           <span>You are offline. Some features may be unavailable.</span>
         </div>
       )}
