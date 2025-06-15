@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { toast } from '@/components/ui/sonner';
 import { useNavigate } from 'react-router-dom';
-import { SERVER_URL } from '@/constants';
+import { SERVER_URL, USER_STORAGE_KEY, ROOMS_STORAGE_KEY } from '@/constants';
 import axios from 'axios';
-import { useRooms } from './RoomContext';
 
 interface User {
   name: string;
@@ -29,17 +28,16 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const { clearRooms } = useRooms();
   const navigate = useNavigate();
 
   useEffect(() => {
     // Check if user data exists in localStorage
-    const storedUser = localStorage.getItem('switchstack-user');
+    const storedUser = localStorage.getItem(USER_STORAGE_KEY);
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
       } catch (error) {
-        localStorage.removeItem('switchstack-user');
+        localStorage.removeItem(USER_STORAGE_KEY);
       }
     }
     setIsLoading(false);
@@ -54,7 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email: 'demo@example.com',
       };
       setUser(mockUser);
-      localStorage.setItem('switchstack-user', JSON.stringify(mockUser));
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(mockUser));
       toast.success('Demo login successful!');
       navigate('/');
       return;
@@ -87,7 +85,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       // Set user in state and localStorage
       setUser(loggedInUser);
-      localStorage.setItem('switchstack-user', JSON.stringify(loggedInUser));
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(loggedInUser));
 
       toast.success('Login successful!');
       navigate('/');
@@ -139,7 +137,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       // Set user in state and localStorage
       setUser(loggedInUser);
-      localStorage.setItem('switchstack-user', JSON.stringify(loggedInUser));
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(loggedInUser));
 
       toast.success('Registration successful!');
       navigate('/');
@@ -160,8 +158,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = () => {
     setUser(null);
-    clearRooms();
-    localStorage.removeItem('switchstack-user');
+    localStorage.removeItem(USER_STORAGE_KEY);
+    localStorage.removeItem(ROOMS_STORAGE_KEY);
     toast.info('You have been logged out');
     navigate('/login');
   };

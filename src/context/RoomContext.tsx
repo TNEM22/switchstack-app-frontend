@@ -2,7 +2,7 @@ import axios from 'axios';
 import { toast } from '@/components/ui/sonner';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-import { SERVER_URL } from '@/constants';
+import { SERVER_URL, ROOMS_STORAGE_KEY } from '@/constants';
 
 export interface Switch {
   _id: string;
@@ -47,13 +47,12 @@ interface RoomContextType {
     startIndex: number,
     endIndex: number
   ) => void;
-  clearRooms: () => void;
 }
 
 // Create context with a more descriptive undefined check
 const RoomContext = createContext<RoomContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'switchstack-rooms';
+// const STORAGE_KEY = 'switchstack-rooms';
 
 export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
   // console.log("RoomProvider rendered");
@@ -101,7 +100,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
   // Initialize Rooms from localStorage and update from API
   useEffect(() => {
     // Initially Load rooms from localStorage
-    const savedRooms = localStorage.getItem(STORAGE_KEY);
+    const savedRooms = localStorage.getItem(ROOMS_STORAGE_KEY);
     const parsedRooms = JSON.parse(savedRooms);
     // console.log('SavedRooms:', savedRooms);
     // console.log('ParsedRooms:', parsedRooms);
@@ -203,7 +202,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!loading) {
       // console.log("Saving rooms to localStorage:", rooms);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(rooms));
+      localStorage.setItem(ROOMS_STORAGE_KEY, JSON.stringify(rooms));
     }
   }, [rooms, loading]);
 
@@ -417,11 +416,6 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
     );
   };
 
-  const clearRooms = () => {
-    setRooms([]);
-    localStorage.removeItem(STORAGE_KEY);
-  };
-
   const contextValue = {
     rooms,
     loading,
@@ -434,7 +428,6 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
     toggleSwitch,
     reorderRooms,
     reorderSwitches,
-    clearRooms,
   };
 
   // console.log("RoomProvider providing context:", contextValue);

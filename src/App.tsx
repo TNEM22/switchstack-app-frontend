@@ -29,8 +29,8 @@ const App = () => (
     >
       <ThemeProvider>
         <NetworkProvider>
-          <RoomProvider>
-            <AuthProvider>
+          <AuthProvider>
+            <RoomProvider>
               <TooltipProvider>
                 <AnimatePresence mode='wait'>
                   <Routes>
@@ -48,8 +48,8 @@ const App = () => (
                 <Toaster />
                 <Sonner position='bottom-right' duration={2000} />
               </TooltipProvider>
-            </AuthProvider>
-          </RoomProvider>
+            </RoomProvider>
+          </AuthProvider>
         </NetworkProvider>
       </ThemeProvider>
     </BrowserRouter>
