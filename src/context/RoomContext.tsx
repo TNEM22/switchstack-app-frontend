@@ -2,7 +2,7 @@ import axios from 'axios';
 import { toast } from '@/components/ui/sonner';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-import { SERVER_URL, ROOMS_STORAGE_KEY } from '@/constants';
+import { SERVER_URL, USER_STORAGE_KEY, ROOMS_STORAGE_KEY } from '@/constants';
 
 export interface Switch {
   _id: string;
@@ -99,6 +99,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Initialize Rooms from localStorage and update from API
   useEffect(() => {
+    if (!localStorage.getItem(USER_STORAGE_KEY)) return; // Check if user is logged in
     // Initially Load rooms from localStorage
     const savedRooms = localStorage.getItem(ROOMS_STORAGE_KEY);
     const parsedRooms = JSON.parse(savedRooms);
@@ -200,6 +201,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Save rooms to localStorage whenever they change
   useEffect(() => {
+    if (!localStorage.getItem(USER_STORAGE_KEY)) return; // Check if user is logged in
     if (!loading) {
       // console.log("Saving rooms to localStorage:", rooms);
       localStorage.setItem(ROOMS_STORAGE_KEY, JSON.stringify(rooms));
