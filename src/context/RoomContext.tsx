@@ -47,6 +47,7 @@ interface RoomContextType {
     startIndex: number,
     endIndex: number
   ) => void;
+  clearRooms: () => void;
 }
 
 // Create context with a more descriptive undefined check
@@ -416,6 +417,11 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
     );
   };
 
+  const clearRooms = () => {
+    setRooms([]);
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
   const contextValue = {
     rooms,
     loading,
@@ -428,6 +434,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
     toggleSwitch,
     reorderRooms,
     reorderSwitches,
+    clearRooms,
   };
 
   // console.log("RoomProvider providing context:", contextValue);

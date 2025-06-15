@@ -3,6 +3,7 @@ import { toast } from '@/components/ui/sonner';
 import { useNavigate } from 'react-router-dom';
 import { SERVER_URL } from '@/constants';
 import axios from 'axios';
+import { useRooms } from './RoomContext';
 
 interface User {
   name: string;
@@ -28,6 +29,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { clearRooms } = useRooms();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -158,6 +160,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = () => {
     setUser(null);
+    clearRooms();
     localStorage.removeItem('switchstack-user');
     toast.info('You have been logged out');
     navigate('/login');
