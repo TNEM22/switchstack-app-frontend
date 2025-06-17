@@ -2,6 +2,7 @@ import axios from 'axios';
 import { toast } from '@/components/ui/sonner';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+import { websocketService } from '@/services/websocketService';
 import { useAuth } from '@/context/AuthContext';
 
 import { SERVER_URL, USER_STORAGE_KEY, ROOMS_STORAGE_KEY } from '@/constants';
@@ -61,6 +62,18 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
+
+  // Setup WebSocket connection when component mounts
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    console.log('Connecting to WebSocket...');
+    websocketService.connect();
+
+    return () => {
+      websocketService.disconnect();
+    };
+  }, [isAuthenticated]);
 
   /*const initializeDemoRooms = () => {
       // Initialize with demo data if no saved rooms
