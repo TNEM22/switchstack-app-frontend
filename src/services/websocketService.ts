@@ -10,6 +10,7 @@ class WebSocketService {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private statusHandlers: StatusHandler[] = [];
   messageCallback: ((message: string) => void) | null = null;
+  private currentStatus: 'connected' | 'disconnected' = 'disconnected';
 
   connect(): void {
     if (this.socket?.readyState === WebSocket.OPEN) return;
@@ -27,7 +28,7 @@ class WebSocketService {
     this.socket.onopen = this.handleOpen.bind(this);
     this.socket.onclose = this.handleClose.bind(this);
     this.socket.onmessage = this.handleMessage.bind(this);
-    this.socket.onerror = this.handleError.bind(this);
+    // this.socket.onerror = this.handleError.bind(this);
   }
 
   disconnect(): void {
@@ -35,6 +36,7 @@ class WebSocketService {
       this.socket.close();
       this.socket = null;
       this.notifyStatusChange('disconnected');
+      this.currentStatus = 'disconnected';
 
       // Clear any reconnect timer
       if (this.reconnectTimer) {
@@ -49,19 +51,21 @@ class WebSocketService {
     // console.log('WebSocket connection established');
     this.reconnectAttempts = 0; // Reset reconnect attempts on successful connection
     this.notifyStatusChange('connected');
+    this.currentStatus = 'connected';
   }
 
   private handleClose(event: CloseEvent): void {
     // console.log('WebSocket connection closed:', event.code, event.reason);
     this.notifyStatusChange('disconnected');
+    this.currentStatus = 'disconnected';
     this.attemptReconnect();
   }
 
-  private handleError(event: Event): void {
-    // console.error('WebSocket error:', event);
-    toast.error('WebSocket error occurred. Could not connect.');
-    // We don't set disconnected here as the close handler will be called after an error
-  }
+  //   private handleError(event: Event): void {
+  //     console.error('WebSocket error:', event);
+  //     toast.error('WebSocket error occurred. Could not connect.');
+  //     // We don't set disconnected here as the close handler will be called after an error
+  //   }
 
   private handleMessage(event: MessageEvent): void {
     // const parsedData = JSON.parse(event.data);
@@ -104,7 +108,10 @@ class WebSocketService {
   }
 
   sendWebSocketMessage(message: string): void {
-    if (this.socket?.readyState === WebSocket.OPEN) {
+    if (
+      this.socket?.readyState === WebSocket.OPEN &&
+      this.currentStatus === 'connected'
+    ) {
       this.socket.send(message);
     } else {
       // console.error('WebSocket is not open. Unable to send message:', message);
