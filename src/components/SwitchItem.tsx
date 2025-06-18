@@ -45,7 +45,8 @@ export function SwitchItem({
   const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleSwitch(roomId, switchItem._id);
+    // toggleSwitch(roomId, switchItem._id);
+    toggleSwitch(roomId, switchItem._id, switchItem.esp);
   };
 
   //   const handleDelete = (e: React.MouseEvent) => {

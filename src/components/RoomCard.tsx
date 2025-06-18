@@ -40,7 +40,8 @@ export function RoomCard({
   const handleSwitchToggle = (e: React.MouseEvent, switchItem: SwitchType) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleSwitch(room.esp_id, switchItem._id);
+    // toggleSwitch(room.esp_id, switchItem._id);
+    toggleSwitch(room.esp_id, switchItem._id, switchItem.esp);
   };
 
   const moveUp = (e: React.MouseEvent) => {
