@@ -21,6 +21,7 @@ class WebSocketService {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
+    this.reconnectAttempts = 0; // Reset reconnect attempts
 
     const wsUrl = SERVER_URL.replace('http', 'ws');
     this.socket = new WebSocket(wsUrl);
