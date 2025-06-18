@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ThemeToggle } from './ThemeToggle';
 import { useAuth } from '@/context/AuthContext';
+import { useNetwork } from '@/context/NetworkContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -9,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { House, Menu, Settings, LogOut, User } from 'lucide-react';
+import { House, Menu, Settings, LogOut, User, WifiOff, Wifi } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -19,9 +20,12 @@ import {
 } from '@/components/ui/sheet';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Badge } from './ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 export function NavBar() {
   const { user, logout, isAuthenticated } = useAuth();
+  const { isOnline, wsConnected, connectWebSocket } = useNetwork();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -75,6 +79,36 @@ export function NavBar() {
         </div>
 
         <div className='flex items-center gap-2'>
+          {/* Connection Status Indicator */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center">
+                  {wsConnected ? (
+                    <Badge variant="outline" className="gap-1 border-green-500 text-green-500">
+                      <Wifi className="h-3 w-3" />
+                      <span className="hidden md:inline">Connected</span>
+                    </Badge>
+                  ) : (
+                    <Badge 
+                      variant="outline" 
+                      className="gap-1 border-destructive text-destructive cursor-pointer hover:bg-destructive/10"
+                      onClick={connectWebSocket}
+                    >
+                      <WifiOff className="h-3 w-3" />
+                      <span className="hidden md:inline">Disconnected</span>
+                    </Badge>
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                {wsConnected 
+                  ? "Connected to server" 
+                  : "Disconnected from server. Click to reconnect"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
           <ThemeToggle />
 
           {/* Mobile menu trigger */}
@@ -117,6 +151,40 @@ export function NavBar() {
                         </Button>
                       </motion.div>
                     ))}
+                    
+                    {/* Mobile Connection Status */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      <Button
+                        variant='ghost'
+                        className={`w-full justify-start gap-2 ${
+                          wsConnected 
+                            ? 'text-green-500 hover:text-green-600' 
+                            : 'text-destructive hover:text-destructive'
+                        }`}
+                        onClick={() => {
+                          if (!wsConnected) {
+                            connectWebSocket();
+                          }
+                        }}
+                      >
+                        {wsConnected ? (
+                          <>
+                            <Wifi className='w-5 h-5' />
+                            Connected to Server
+                          </>
+                        ) : (
+                          <>
+                            <WifiOff className='w-5 h-5' />
+                            Reconnect to Server
+                          </>
+                        )}
+                      </Button>
+                    </motion.div>
+                    
                     <motion.div
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}

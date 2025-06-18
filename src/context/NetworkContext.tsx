@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Network } from '@capacitor/network';
 import { toast } from '@/components/ui/sonner';
+import { websocketService } from '@/services/websocketService';
 
 interface NetworkContextType {
   isOnline: boolean;
   connectionType: string | null;
+  wsConnected: boolean;
+  connectWebSocket: () => void;
 }
 
 const NetworkContext = createContext<NetworkContextType | undefined>(undefined);
@@ -17,6 +20,34 @@ export const NetworkProvider = ({
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [connectionType, setConnectionType] = useState<string | null>(null);
   const [wasOffline, setWasOffline] = useState<boolean>(false);
+  const [wsConnected, setWsConnected] = useState<boolean>(false);
+
+  // Initialize WebSocket Status Handlers
+  useEffect(() => {
+    // Listen for WebSocket connection status changes
+    const handleWsStatus = (status: 'connected' | 'disconnected') => {
+      setWsConnected(status === 'connected');
+      // console.log(`WebSocket status changed: ${status}`);
+
+      if (status === 'connected') {
+        toast.success('Connected to server', {
+          duration: 3000,
+          id: 'ws-connected-toast',
+        });
+      } else {
+        toast.error('Disconnected from server', {
+          duration: 5000,
+          id: 'ws-disconnected-toast',
+        });
+      }
+    };
+
+    websocketService.onStatusChange(handleWsStatus);
+
+    return () => {
+      websocketService.removeStatusHandler(handleWsStatus);
+    };
+  }, []);
 
   useEffect(() => {
     // Check initial network status
@@ -38,6 +69,11 @@ export const NetworkProvider = ({
           className: 'network-status-toast',
         });
         setWasOffline(false);
+
+        // Try to reconnect WebSocket when network is back
+        if (!wsConnected) {
+          websocketService.connect();
+        }
       } else if (!status.connected && isOnline) {
         // Connection was lost
         toast.error('You are offline. Some features may be unavailable.', {
@@ -53,17 +89,24 @@ export const NetworkProvider = ({
     });
 
     return () => {
-      // Clean up listener when component unmounts
+      // Clean up listeners when component unmounts
       Network.removeAllListeners();
-      //   networkStatusListener.remove();
     };
-  }, [isOnline]);
+  }, [isOnline, wsConnected]);
+
+  const connectWebSocket = () => {
+    if (isOnline && !wsConnected) {
+      websocketService.connect();
+    }
+  };
 
   return (
     <NetworkContext.Provider
       value={{
         isOnline,
         connectionType,
+        wsConnected,
+        connectWebSocket,
       }}
     >
       {children}

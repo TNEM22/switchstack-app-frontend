@@ -239,7 +239,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
         toast.success('Rooms loaded successfully');
       })
       .catch((error) => {
-        console.error(error);
+        // console.error(error);
 
         // Set loading to false on error as well
         setLoading(false);
