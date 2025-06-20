@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+
+import { useAuth } from './AuthContext';
 import { Network } from '@capacitor/network';
 import { toast } from '@/components/ui/sonner';
 import { websocketService } from '@/services/websocketService';
@@ -19,11 +21,12 @@ export const NetworkProvider = ({
 }) => {
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [connectionType, setConnectionType] = useState<string | null>(null);
-  const [wasOffline, setWasOffline] = useState<boolean>(false);
   const [wsConnected, setWsConnected] = useState<boolean>(false);
+  const { isAuthenticated } = useAuth();
 
   // Initialize WebSocket Status Handlers
   useEffect(() => {
+    if (!isAuthenticated) return;
     // Listen for WebSocket connection status changes
     const handleWsStatus = (status: 'connected' | 'disconnected') => {
       setWsConnected(status === 'connected');
@@ -47,7 +50,7 @@ export const NetworkProvider = ({
     return () => {
       websocketService.removeStatusHandler(handleWsStatus);
     };
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     // Check initial network status
@@ -66,9 +69,7 @@ export const NetworkProvider = ({
         // Connection was restored
         toast.success('You are back online!', {
           duration: 3000,
-          className: 'network-status-toast',
         });
-        setWasOffline(false);
 
         // Try to reconnect WebSocket when network is back
         if (!wsConnected) {
@@ -79,9 +80,7 @@ export const NetworkProvider = ({
         toast.error('You are offline. Some features may be unavailable.', {
           duration: Infinity, // Show until connection restored
           id: 'offline-toast', // Give it an ID to reference it later
-          className: 'network-status-toast',
         });
-        setWasOffline(true);
       }
 
       setIsOnline(status.connected);
