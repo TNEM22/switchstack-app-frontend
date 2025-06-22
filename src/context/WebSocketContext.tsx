@@ -46,7 +46,7 @@ export const WebSocketProvider = ({
   useEffect(() => {
     if (rooms.length && !hasEstablishedConnection.current && !socket.current) {
       connect('initial connect', () =>
-        toast.error('Failed to connect server', { duration: 7000 })
+        toast.error('Server Disconnected', { duration: 7000 })
       );
     }
   }, [rooms]);
@@ -107,7 +107,7 @@ export const WebSocketProvider = ({
       });
       wasOffline.current = false;
       connect('network reconnect', () =>
-        toast.error('Connection Failed', { duration: 7000 })
+        toast.error('Server Disconnected', { duration: 7000 })
       );
     }
   }, [isOnline]);
@@ -133,7 +133,7 @@ export const WebSocketProvider = ({
 
   function disconnect() {
     if (socket.current) {
-      // console.log('WebSocket disconnected!');
+      console.log('WebSocket disconnected manually!');
       socket.current.close();
       setIsWsConnected(false);
       socket.current = null;

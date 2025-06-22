@@ -125,7 +125,7 @@ export function NavBar() {
                       className='gap-1 border-destructive text-destructive cursor-pointer hover:bg-destructive/10'
                       onClick={() =>
                         connectWebSocket('Button reconnect', () =>
-                          toast.error('Failed to connect server', {
+                          toast.error('Server Disconnected', {
                             duration: 7000,
                           })
                         )
@@ -208,7 +208,7 @@ export function NavBar() {
                         onClick={() => {
                           if (!isWsConnected) {
                             connectWebSocket('Mobile reconnect', () =>
-                              toast.error('Failed to connect server', {
+                              toast.error('Server Disconnected', {
                                 duration: 7000,
                               })
                             );

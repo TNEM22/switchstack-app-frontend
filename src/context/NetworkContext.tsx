@@ -15,7 +15,7 @@ export const NetworkProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [isOnline, setIsOnline] = useState<boolean>(false);
+  const [isOnline, setIsOnline] = useState<boolean>(true);
   const [connectionType, setConnectionType] = useState<string | null>(null);
 
   useEffect(() => {
