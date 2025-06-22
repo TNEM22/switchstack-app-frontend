@@ -1,35 +1,38 @@
+// TODO: Implement ReactQuery for data fetching
+// TODO: Upgrade React Router to v7
+import { AnimatePresence } from 'framer-motion';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
 import { Toaster } from '@/components/ui/toaster';
-import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider } from '@/context/ThemeContext';
+import { Toaster as Sonner } from '@/components/ui/sonner';
+
 import { AuthProvider } from '@/context/AuthContext';
 import { RoomProvider } from '@/context/RoomContext';
+import { WebSocketProvider } from './context/WebSocketContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import { NetworkProvider } from '@/context/NetworkContext';
-import NotFound from './pages/NotFound';
+
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Settings from './pages/Settings';
+import NotFound from './pages/NotFound';
 import Dashboard from './pages/Dashboard';
 import RoomDetail from './pages/RoomDetail';
-import Settings from './pages/Settings';
 import ProtectedRoutes from './utils/ProtectedRoutes';
-import { AnimatePresence } from 'framer-motion';
-
-const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true,
-      }}
-    >
-      <ThemeProvider>
+  <NetworkProvider>
+    <ThemeProvider>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <AuthProvider>
-          <NetworkProvider>
-            <RoomProvider>
+          <RoomProvider>
+            <WebSocketProvider>
               <TooltipProvider>
                 <AnimatePresence mode='wait'>
                   <Routes>
@@ -44,14 +47,14 @@ const App = () => (
                   </Routes>
                 </AnimatePresence>
                 <Toaster />
-                <Sonner position='bottom-right' duration={2000} />
+                <Sonner />
               </TooltipProvider>
-            </RoomProvider>
-          </NetworkProvider>
+            </WebSocketProvider>
+          </RoomProvider>
         </AuthProvider>
-      </ThemeProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
+      </BrowserRouter>
+    </ThemeProvider>
+  </NetworkProvider>
 );
 
 export default App;

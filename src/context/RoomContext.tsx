@@ -2,8 +2,8 @@ import axios from 'axios';
 import { toast } from '@/components/ui/sonner';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-import { websocketService } from '@/services/websocketService';
 import { useAuth } from '@/context/AuthContext';
+import { useNetwork } from './NetworkContext';
 
 import { SERVER_URL, ROOMS_STORAGE_KEY } from '@/constants';
 
@@ -27,6 +27,7 @@ export interface Room {
 
 interface RoomContextType {
   rooms: Room[];
+  setRooms: React.Dispatch<React.SetStateAction<Room[]>>;
   loading: boolean;
   addRoom: (
     name: string,
@@ -43,7 +44,7 @@ interface RoomContextType {
     updates: Partial<Switch>
   ) => void;
   // deleteSwitch: (roomId: string, switchId: string) => void;
-  toggleSwitch: (roomId: string, switchId: string, espId: string) => void;
+  // toggleSwitch: (roomId: string, switchId: string, espId: string) => void;
   reorderRooms: (startIndex: number, endIndex: number) => void;
   reorderSwitches: (
     roomId: string,
@@ -61,9 +62,10 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
+  const { isOnline } = useNetwork();
 
   // Function to confirm toggle switch state from WebSocket message
-  const confirmToggleSwitch = (message: string) => {
+  /*const confirmToggleSwitch = (message: string) => {
     const parsedMessage = JSON.parse(message);
 
     const { espId, switchId, state } = parsedMessage;
@@ -96,19 +98,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
       toast.error(`Error toggling switch: ${parsedMessage.message}`);
       return;
     }
-  };
-  // Set the message callback for WebSocket service
-  websocketService.messageCallback = confirmToggleSwitch;
-
-  // Setup WebSocket connection when component mounts
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    websocketService.connect();
-
-    return () => {
-      websocketService.disconnect();
-    };
-  }, [isAuthenticated]);
+  };*/
 
   /*const initializeDemoRooms = () => {
       // Initialize with demo data if no saved rooms
@@ -152,102 +142,103 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!isAuthenticated) return; // Check if user is logged in
 
-    // Set loading state to true at the beginning
-    setLoading(true);
-    // Show loading toast that will stay until dismissed
-    const loadingToastId = toast.loading('Loading your rooms...');
-
     // Initially Load rooms from localStorage
     const savedRooms = localStorage.getItem(ROOMS_STORAGE_KEY);
     const parsedRooms = JSON.parse(savedRooms) ?? []; // Default to empty array if null
     setRooms(parsedRooms);
 
-    // TODO: Update rooms from api
-    const url = `${SERVER_URL}/api/v1/esps`;
-    axios
-      .get(url, { withCredentials: true })
-      .then((response) => {
-        const data = response.data.data.esps;
+    if (isOnline) {
+      // Set loading state to true at the beginning
+      setLoading(true);
+      // Show loading toast that will stay until dismissed
+      const loadingToastId = toast.loading('Loading your rooms...');
+      axios
+        .get(`${SERVER_URL}/api/v1/esps`, { withCredentials: true })
+        .then((response) => {
+          const data = response.data.data.esps;
 
-        // Compare with localStorage
-        if (!data || data.length === 0) {
-          setRooms([]);
-        } else {
-          // If rooms are not found in localstorage set the rooms
-          if (parsedRooms.length === 0) {
-            setRooms(data);
+          // Compare with localStorage
+          if (!data || data.length === 0) {
+            setRooms([]);
           } else {
-            // Filter, Update and Add rooms
-            // Step 1: Filter out rooms that are already in localStorage
-            const existingRooms = parsedRooms.filter((room: Room) =>
-              data.find((r: Room) => r.esp_id === room.esp_id)
-            );
+            // If rooms are not found in localstorage set the rooms
+            if (parsedRooms.length === 0) {
+              setRooms(data);
+            } else {
+              // Filter, Update and Add rooms
+              // Step 1: Filter out rooms that are already in localStorage
+              const existingRooms = parsedRooms.filter((room: Room) =>
+                data.find((r: Room) => r.esp_id === room.esp_id)
+              );
 
-            // Step 2: Update existing rooms with latest data
-            const updatedRooms = existingRooms.map((room: Room) => {
-              const apiRoom = data.find((r: Room) => r.esp_id === room.esp_id);
-              if (apiRoom) {
-                // Update the switches
-                const updatedSwitches = apiRoom.switches.map((sw: Switch) => {
-                  const existingSwitch = room.switches.find(
-                    (s: Switch) => s._id === sw._id
-                  );
-                  if (existingSwitch) {
-                    // Update the switch
-                    return {
-                      ...existingSwitch,
-                      name: sw.name,
-                      icon: sw.icon,
-                      state: sw.state,
-                    };
-                  } else {
-                    // Add new switch if it doesn't exist
-                    return sw;
-                  }
-                });
-                return {
-                  ...room,
-                  name: apiRoom.name,
-                  icon: apiRoom.icon,
-                  switches: updatedSwitches,
-                };
-              }
-              return room;
-            });
-
-            // Step 3: Add remaining rooms if any
-            if (updatedRooms.length < data.length) {
-              data.forEach((room: Room) => {
-                const found = updatedRooms.find(
+              // Step 2: Update existing rooms with latest data
+              const updatedRooms = existingRooms.map((room: Room) => {
+                const apiRoom = data.find(
                   (r: Room) => r.esp_id === room.esp_id
                 );
-                if (!found) {
-                  updatedRooms.push(room);
+                if (apiRoom) {
+                  // Update the switches
+                  const updatedSwitches = apiRoom.switches.map((sw: Switch) => {
+                    const existingSwitch = room.switches.find(
+                      (s: Switch) => s._id === sw._id
+                    );
+                    if (existingSwitch) {
+                      // Update the switch
+                      return {
+                        ...existingSwitch,
+                        name: sw.name,
+                        icon: sw.icon,
+                        state: sw.state,
+                      };
+                    } else {
+                      // Add new switch if it doesn't exist
+                      return sw;
+                    }
+                  });
+                  return {
+                    ...room,
+                    name: apiRoom.name,
+                    icon: apiRoom.icon,
+                    switches: updatedSwitches,
+                  };
                 }
+                return room;
               });
+
+              // Step 3: Add remaining rooms if any
+              if (updatedRooms.length < data.length) {
+                data.forEach((room: Room) => {
+                  const found = updatedRooms.find(
+                    (r: Room) => r.esp_id === room.esp_id
+                  );
+                  if (!found) {
+                    updatedRooms.push(room);
+                  }
+                });
+              }
+
+              // Step 4: Set Rooms
+              setRooms(updatedRooms);
             }
-
-            // Step 4: Set Rooms
-            setRooms(updatedRooms);
           }
-        }
 
-        // Set loading to false after rooms are fetched and updated
-        setLoading(false);
-        // Dismiss the loading toast and show success message
-        toast.dismiss(loadingToastId);
-        toast.success('Rooms loaded successfully');
-      })
-      .catch((error) => {
-        // console.error(error);
+          // Set loading to false after rooms are fetched and updated
+          setLoading(false);
+          // Dismiss the loading toast and show success message
+          toast.dismiss(loadingToastId);
+          toast.success('Rooms loaded successfully');
+        })
+        .catch((error) => {
+          // console.error(error);
 
-        // Set loading to false on error as well
-        setLoading(false);
-        // Dismiss the loading toast and show error message
-        toast.dismiss(loadingToastId);
-        toast.error('Failed to load rooms');
-      });
-  }, [isAuthenticated]);
+          // Set loading to false on error as well
+          setLoading(false);
+          // Dismiss the loading toast and show error message
+          toast.dismiss(loadingToastId);
+          toast.error('Failed to load rooms');
+        });
+    }
+  }, [isAuthenticated, isOnline]);
 
   // Save rooms to localStorage whenever they change
   useEffect(() => {
@@ -448,39 +439,39 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
   //     );
   //   };
 
-  const toggleSwitch = (roomId: string, switchId: string, espId: string) => {
-    const esp = rooms.find((room) => room.esp_id === roomId);
-    const room_switch = esp?.switches.find((sw) => sw._id === switchId);
+  // const toggleSwitch = (roomId: string, switchId: string, espId: string) => {
+  //     const esp = rooms.find((room) => room.esp_id === roomId);
+  //     const room_switch = esp?.switches.find((sw) => sw._id === switchId);
 
-    if (websocketService.isConnected()) {
-      // console.log('Sending WebSocket message');
-      const message = {
-        espId,
-        switchId,
-        state: !room_switch?.state,
-      };
-      // `${espId},${switchId},${!room_switch?.state ? 1 : 0}`
-      websocketService.sendWebSocketMessage(JSON.stringify(message));
-    }
+  //     /*if (websocketService.isConnected()) {
+  //       // console.log('Sending WebSocket message');
+  //       const message = {
+  //         espId,
+  //         switchId,
+  //         state: !room_switch?.state,
+  //       };
+  //       // `${espId},${switchId},${!room_switch?.state ? 1 : 0}`
+  //       websocketService.sendWebSocketMessage(JSON.stringify(message));
+  //     }*/
 
-    setRooms(
-      rooms.map((room) => {
-        if (room.esp_id === roomId) {
-          return {
-            ...room,
-            switches: room.switches.map((sw) => {
-              if (sw._id === switchId) {
-                const newState = !sw.state;
-                return { ...sw, state: newState };
-              }
-              return sw;
-            }),
-          };
-        }
-        return room;
-      })
-    );
-  };
+  //     setRooms(
+  //       rooms.map((room) => {
+  //         if (room.esp_id === roomId) {
+  //           return {
+  //             ...room,
+  //             switches: room.switches.map((sw) => {
+  //               if (sw._id === switchId) {
+  //                 const newState = !sw.state;
+  //                 return { ...sw, state: newState };
+  //               }
+  //               return sw;
+  //             }),
+  //           };
+  //         }
+  //         return room;
+  //       })
+  //     );
+  // };
 
   const reorderRooms = (startIndex: number, endIndex: number) => {
     const result = Array.from(rooms);
@@ -516,6 +507,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 
   const contextValue = {
     rooms,
+    setRooms,
     loading,
     addRoom,
     updateRoom,
@@ -523,7 +515,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
     // addSwitch,
     updateSwitch,
     // deleteSwitch,
-    toggleSwitch,
+    // toggleSwitch,
     reorderRooms,
     reorderSwitches,
   };

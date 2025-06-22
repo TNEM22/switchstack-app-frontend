@@ -1,5 +1,7 @@
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { ChevronUp, ChevronDown } from 'lucide-react';
+
 import {
   Card,
   CardContent,
@@ -9,9 +11,11 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+
+import { useWebSocket } from '@/context/WebSocketContext';
 import { useRooms, Room, Switch as SwitchType } from '@/context/RoomContext';
+
 import { DynamicIcon } from './DynamicIcon';
-import { ChevronUp, ChevronDown } from 'lucide-react';
 
 interface RoomCardProps {
   room: Room;
@@ -29,9 +33,10 @@ export function RoomCard({
   isLastItem = false,
 }: RoomCardProps) {
   // const [isHovered, setIsHovered] = useState(false);
-  const { toggleSwitch, reorderRooms } = useRooms();
-  // console.log('RoomCard rendered for room:', room.name);
-  // console.log('Room Switches:', room.switches);
+  // const { toggleSwitch, reorderRooms } = useRooms();
+  const { reorderRooms } = useRooms();
+  const { toggleSwitch } = useWebSocket();
+
   const activeSwitches = room.switches.filter((sw) => sw.state).length;
   const totalSwitches = room.switches.length;
 

@@ -1,7 +1,20 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ThemeToggle } from './ThemeToggle';
+import {
+  House,
+  Menu,
+  Settings,
+  LogOut,
+  User,
+  WifiOff,
+  Wifi,
+} from 'lucide-react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
+
 import { useAuth } from '@/context/AuthContext';
-import { useNetwork } from '@/context/NetworkContext';
+import { useWebSocket } from '@/context/WebSocketContext';
+
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -10,7 +23,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { House, Menu, Settings, LogOut, User, WifiOff, Wifi } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -18,14 +30,20 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
+import { ThemeToggle } from './ThemeToggle';
 import { Badge } from './ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from './ui/tooltip';
 
 export function NavBar() {
   const { user, logout, isAuthenticated } = useAuth();
-  const { isOnline, wsConnected, connectWebSocket } = useNetwork();
+  const { isWsConnected, connect: connectWebSocket } = useWebSocket();
+
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -83,28 +101,37 @@ export function NavBar() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex items-center">
-                  {wsConnected ? (
-                    <Badge variant="outline" className="gap-1 border-green-500 text-green-500">
-                      <Wifi className="h-3 w-3" />
-                      <span className="hidden md:inline">Connected</span>
+                <div className='flex items-center'>
+                  {isWsConnected ? (
+                    <Badge
+                      variant='outline'
+                      className='gap-1 border-green-500 text-green-500'
+                    >
+                      <Wifi className='h-3 w-3' />
+                      <span className='hidden md:inline'>Connected</span>
                     </Badge>
                   ) : (
-                    <Badge 
-                      variant="outline" 
-                      className="gap-1 border-destructive text-destructive cursor-pointer hover:bg-destructive/10"
-                      onClick={connectWebSocket}
+                    <Badge
+                      variant='outline'
+                      className='gap-1 border-destructive text-destructive cursor-pointer hover:bg-destructive/10'
+                      onClick={() =>
+                        connectWebSocket('Button reconnect', () =>
+                          toast.error('Failed to connect server', {
+                            duration: 7000,
+                          })
+                        )
+                      }
                     >
-                      <WifiOff className="h-3 w-3" />
-                      <span className="hidden md:inline">Disconnected</span>
+                      <WifiOff className='h-3 w-3' />
+                      <span className='hidden md:inline'>Disconnected</span>
                     </Badge>
                   )}
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                {wsConnected 
-                  ? "Connected to server" 
-                  : "Disconnected from server. Click to reconnect"}
+                {isWsConnected
+                  ? 'Connected to server'
+                  : 'Disconnected from server. Click to reconnect'}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -121,7 +148,10 @@ export function NavBar() {
               </SheetTrigger>
               <SheetContent side='left' className='w-[300px]'>
                 <SheetHeader className='border-b pb-4'>
-                  <SheetTitle className='text-primary'>SwitchStack</SheetTitle>
+                  <SheetTitle>
+                    <span className='text-primary'>Switch</span>
+                    <span>Stack</span>
+                  </SheetTitle>
                 </SheetHeader>
                 <div className='mt-6 space-y-1'>
                   <AnimatePresence>
@@ -151,8 +181,9 @@ export function NavBar() {
                         </Button>
                       </motion.div>
                     ))}
-                    
+
                     {/* Mobile Connection Status */}
+                    {/* Websocket Connection Status */}
                     <motion.div
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
@@ -161,17 +192,21 @@ export function NavBar() {
                       <Button
                         variant='ghost'
                         className={`w-full justify-start gap-2 ${
-                          wsConnected 
-                            ? 'text-green-500 hover:text-green-600' 
+                          isWsConnected
+                            ? 'text-green-500 hover:text-green-600'
                             : 'text-destructive hover:text-destructive'
                         }`}
                         onClick={() => {
-                          if (!wsConnected) {
-                            connectWebSocket();
+                          if (!isWsConnected) {
+                            connectWebSocket('Mobile reconnect', () =>
+                              toast.error('Failed to connect server', {
+                                duration: 7000,
+                              })
+                            );
                           }
                         }}
                       >
-                        {wsConnected ? (
+                        {isWsConnected ? (
                           <>
                             <Wifi className='w-5 h-5' />
                             Connected to Server
@@ -184,7 +219,7 @@ export function NavBar() {
                         )}
                       </Button>
                     </motion.div>
-                    
+
                     <motion.div
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}

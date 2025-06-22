@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { MoreVertical, Settings, Pencil, Trash2 } from 'lucide-react';
+
 import { Card } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useRooms, Switch as SwitchType } from '@/context/RoomContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { DynamicIcon } from './DynamicIcon';
-import { MoreVertical, Settings, Pencil, Trash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -18,8 +19,11 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+
+import { useWebSocket } from '@/context/WebSocketContext';
+import { useRooms, Switch as SwitchType } from '@/context/RoomContext';
+
+import { DynamicIcon } from './DynamicIcon';
 import { IconSelector } from './IconSelector';
 
 interface SwitchItemProps {
@@ -35,7 +39,10 @@ export function SwitchItem({
   onEdit,
   isPadded = false,
 }: SwitchItemProps) {
-  const { toggleSwitch, updateSwitch } = useRooms();
+  //   const { toggleSwitch, updateSwitch } = useRooms();
+  const { updateSwitch } = useRooms();
+  const { toggleSwitch } = useWebSocket();
+
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(switchItem.name ?? 'Switch');
   const [selectedIcon, setSelectedIcon] = useState(
