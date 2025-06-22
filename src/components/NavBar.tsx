@@ -42,12 +42,21 @@ import {
 
 export function NavBar() {
   const { user, logout, isAuthenticated } = useAuth();
-  const { isWsConnected, connect: connectWebSocket } = useWebSocket();
+  const {
+    isWsConnected,
+    connect: connectWebSocket,
+    disconnect,
+  } = useWebSocket();
 
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   if (!isAuthenticated) return null;
+
+  const handleLogout = () => {
+    logout();
+    disconnect();
+  };
 
   const getInitials = (name: string) => {
     return name
@@ -229,7 +238,7 @@ export function NavBar() {
                         variant='ghost'
                         className='w-full justify-start mt-6 gap-2 text-destructive hover:text-destructive'
                         onClick={() => {
-                          logout();
+                          handleLogout();
                           setMobileMenuOpen(false);
                         }}
                       >
@@ -276,7 +285,7 @@ export function NavBar() {
               </DropdownMenuItem>
               <DropdownMenuItem
                 className='text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer'
-                onClick={logout}
+                onClick={handleLogout}
               >
                 <LogOut className='mr-2 h-4 w-4' />
                 <span>Log out</span>
